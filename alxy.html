@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <title>Alxy te habla</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #ffe0b2, #ffab91);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100dvh;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    #alxy-img {
+      width: 70vw;
+      max-width: 300px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease-in-out;
+      animation: float 3s ease-in-out infinite;
+      cursor: pointer;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+      100% { transform: translateY(0); }
+    }
+
+    #alxy-img:active {
+      transform: scale(1.04) rotate(1deg);
+    }
+
+    .hint {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #6d4c41;
+      font-style: italic;
+    }
+
+    .phrase {
+      margin-top: 30px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #5d4037;
+      padding: 0 1.5rem;
+      min-height: 3em;
+    }
+
+    audio {
+      display: none;
+    }
+
+    .letter {
+      opacity: 0;
+      transition: opacity 0.2s ease-in;
+    }
+
+    .letter.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <img id="alxy-img" src="alxy.jpg" alt="Alxy" />
+  <div class="hint">🎧 Toca a Alxy para escucharlo y ver su frase</div>
+  <div class="phrase" id="phrase-container"></div>
+  <audio id="alxy-audio" src="alxy-voz.mp3" preload="auto"></audio>
+
+  <script>
+    const phraseText = "No estudias para ser perfecto, sino para avanzar hacia lo que sueñas.";
+    const phraseContainer = document.getElementById('phrase-container');
+    const alxyAudio = document.getElementById('alxy-audio');
+    const alxyImg = document.getElementById('alxy-img');
+
+    // Dividir frase en spans
+    function renderLetters() {
+      phraseContainer.innerHTML = '';
+      for (let char of phraseText) {
+        const span = document.createElement('span');
+        span.textContent = char;
+        span.classList.add('letter');
+        phraseContainer.appendChild(span);
+      }
+    }
+
+    // Mostrar letra por letra sincronizado con duración del audio
+    function animateText() {
+      const letters = document.querySelectorAll('.letter');
+      const totalDuration = alxyAudio.duration * 1000; // en ms
+      const delay = totalDuration / letters.length;
+
+      letters.forEach((span, index) => {
+        setTimeout(() => {
+          span.classList.add('visible');
+        }, index * delay);
+      });
+    }
+
+    // Evento de clic
+    alxyImg.addEventListener('click', () => {
+      alxyAudio.currentTime = 0;
+      renderLetters();
+
+      // Esperar que el audio esté listo
+      if (alxyAudio.readyState >= 2) {
+        alxyAudio.play();
+        animateText();
+      } else {
+        alxyAudio.addEventListener('canplaythrough', () => {
+          alxyAudio.play();
+          animateText();
+        }, { once: true });
+      }
+    });
+  </script>
+</body>
+</html>
